@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent {label "terraform-slave"}
     
     parameters {
         choice(name: 'TERRAFORM_WORKSPACE', choices: ['dev', 'prod'], description: 'Choose Terraform workspace: dev or prod')
