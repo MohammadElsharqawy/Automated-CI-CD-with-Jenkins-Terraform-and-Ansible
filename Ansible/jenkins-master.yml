@@ -1,0 +1,57 @@
+# open 8080
+---
+- hosts: master
+  name: Install Jenkins on Master
+  remote_user: ubuntu
+  become: yes
+
+  tasks:
+    # Install Jenkins
+    - name: Update apt cache
+      apt:
+        update_cache: true
+
+    - name: Install curl and gnupg
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - curl
+        - gnupg
+
+    - name: Add Jenkins APT keyring
+      shell: "curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | tee /usr/share/keyrings/jenkins-keyring.asc"
+
+    - name: Add Jenkins APT repository
+      shell: "echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list"
+
+    - name: Update apt cache after adding Jenkins repository
+      apt:
+        update_cache: yes
+
+    - name: Install Java
+      apt:
+        name: openjdk-11-jre
+        state: present
+
+    - name: Install Jenkins
+      apt:
+        name: jenkins
+        state: present
+
+    - name: Create Jenkins user
+      user:
+        name: jenkins
+        shell: /bin/bash
+        system: yes
+
+    - name: Create Jenkins directory
+      file:
+        path: /home/ubuntu/jenkins
+        state: directory
+
+    - name: Start Jenkins service
+      service:
+        name: jenkins
+        state: started
+        enabled: yes
