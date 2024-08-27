@@ -1,0 +1,8 @@
+[infra]
+#public ip of the ec2 that the infra pipline will run on
+
+[master]
+#public ip of the ec2 that the jenkins-master  will run on
+
+
+[private-deploy]
