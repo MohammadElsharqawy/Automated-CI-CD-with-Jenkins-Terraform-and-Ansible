@@ -1,4 +1,3 @@
-# open 8080
 ---
 - hosts: master
   name: Install Jenkins on Master
