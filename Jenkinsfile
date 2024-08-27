@@ -7,15 +7,15 @@ pipeline {
     }
 
     environment {
-        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID ')
-        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+        AWS_ACCESS_KEY_ID     = credentials('aws_access_key_id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
         AWS_DEFAULT_REGION = 'us-east-1'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/MohammadElsharqawy/Automated-CI-CD-with-Jenkins-Terraform-and-Ansible'
+                git branch: 'main', url: 'https://github.com/MohammadElsharqawy/Automated-CI-CD-with-Jenkins-Terraform-and-Ansible.git'
             }
         }
         
@@ -41,6 +41,7 @@ pipeline {
         stage('Create and Select Workspace') {
             steps {
                 script {
+                    dir('Inrastructure-by-Terraform') {
                     def workspace = params.TERRAFORM_WORKSPACE
                     def workspaceExists = sh(script: "terraform workspace list | grep -q '${workspace}'", returnStatus: true) == 0
                    
@@ -49,7 +50,7 @@ pipeline {
                         sh "terraform workspace new '${workspace}'"
                     }
                    
-                    dir('Inrastructure-by-Terraform') {
+                    
                         sh "terraform workspace select '${params.TERRAFORM_WORKSPACE}'"
                     }
                 }
