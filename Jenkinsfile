@@ -15,7 +15,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/MohammadElsharqawy/Automated-CI-CD-with-Jenkins-Terraform-and-Ansible.git'
+                git branch: 'main', url: 'https://github.com/MohammadElsharqawy/Automated-CI-CD-with-Jenkins-Terraform-and-Ansible'
             }
         }
         
