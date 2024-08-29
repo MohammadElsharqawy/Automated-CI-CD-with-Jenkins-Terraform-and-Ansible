@@ -1,11 +1,3 @@
-# Generating random password
-resource "random_password" "password" {
-  length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
-}
-
-
 # Creating subnet groups
 resource "aws_db_subnet_group" "mydb_subnet_group" {
   name = "mydb-subnet-group"
@@ -21,15 +13,13 @@ resource "aws_db_subnet_group" "mydb_subnet_group" {
 
 # Creating rds
 resource "aws_db_instance" "default" {
-  allocated_storage                   = 10
-  db_name                             = "mydb"
-  engine                              = "mysql"
-  engine_version                      = "5.7"
-  instance_class                      = "db.t3.micro"
-  identifier                          = "mydb"
-  username                            = "master"
-  password                            = random_password.password.result
-  iam_database_authentication_enabled = true
+  allocated_storage                   = var.database_server.allocated_storage
+  db_name                             = var.database_server.db_name
+  engine                              = var.database_server.db_engine
+  engine_version                      = var.database_server.db_engine_version
+  instance_class                      = var.database_server.db_instance_class
+  username                            = var.database_server.db_username
+  password                            = var.database_server.db_password
 
   db_subnet_group_name   = aws_db_subnet_group.mydb_subnet_group.name
   vpc_security_group_ids = [aws_security_group.sg2_allow_3000_and_shh_from_vpc.id]

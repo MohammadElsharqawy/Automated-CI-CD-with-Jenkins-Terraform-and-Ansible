@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+    
+    environment {
+        APP_NAME = 'sharqm/nodeapp'
+    }
+    parameters {
+        choice(name: 'WORKSPACE', choices: ['dev', 'prod'], description: 'Choose workspace: dev or prod') 
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'rds_redis', url: 'https://github.com/mahmoud254/jenkins_nodejs_example.git'
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps{
+                script{
+                    sh "docker build -t ${APP_NAME}:version_${env.BUILD_NUMBER} -f dockerfile ."
+                }
+            }
+        }
+        
+        stage('Log in to Docker Hub') {
+            steps{
+                script{
+                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        sh "docker login -u ${USERNAME} -p ${PASSWORD}"
+                    }
+                }
+            }
+        }
+        
+        stage('Push Docker Image') {
+            steps{
+                script{
+                    sh "docker push ${APP_NAME}:version_${env.BUILD_NUMBER}"
+                }
+            }
+        }
+    }
+    post {
+        always {
+            echo 'CI Pipeline completed.'
+            cleanWs()
+        }
+        
+        success {
+            build job: 'nodeapp-CD', parameters: [
+                             string(name: 'BUILD_NUMBER', value: env.BUILD_NUMBER),
+                             string(name: 'TERRAFORM_WORKSPACE', value: params.WORKSPACE)
+                          ]
+        }
+    }
+}
+    

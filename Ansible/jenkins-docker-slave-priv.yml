@@ -1,10 +1,11 @@
 ---
-- hosts: infra
-  name: Install Jenkins and Terraform on Slave EC2
+- hosts: private_deploy
+  name: Install Jenkins and Docker on Private Slave EC2
   remote_user: ubuntu
   become: yes
-   vars:
-    ssh_public_key: "{{ lookup('file', '~/ssh_public_key.pub') }}"
+  vars:
+    ssh_public_key: "{{ lookup('file', './ssh_public_key.pub') }}"
+
   tasks:
     - name: Update apt cache
       apt:
@@ -30,7 +31,7 @@
 
     - name: Install Java
       apt:
-        name: openjdk-17-jre
+        name: openjdk-11-jre
         state: present
 
     - name: Install Jenkins
@@ -48,7 +49,6 @@
       file:
         path: /home/jenkins
         state: directory
-        mode: "0777"
 
     - name: Change ownership of /home/jenkins
       file:
@@ -57,7 +57,7 @@
         group: jenkins
         recurse: yes
 
-    - name: create .ssh dir
+    - name: Create .ssh directory for Jenkins user
       file:
         path: /home/jenkins/.ssh
         state: directory
@@ -66,7 +66,7 @@
       authorized_key:
         user: jenkins
         key: "{{ ssh_public_key }}"
-        state: present    
+        state: present
 
     - name: Start Jenkins service
       service:
@@ -74,18 +74,37 @@
         state: started
         enabled: yes
 
-    # Install Terraform
-    - name: Import HashiCorp GPG key
-      shell: curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor | tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
-
-    - name: Add HashiCorp APT repository
-      shell: echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
-
-    - name: Update apt cache after adding HashiCorp repository
+    - name: Install required system packages
       apt:
-        update_cache: yes
+        pkg:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - python3-pip
+          - virtualenv
+          - python3-setuptools
+        state: latest
+        update_cache: true
 
-    - name: Install Terraform
-      apt:
-        name: terraform
+    - name: Import Docker GPG Key from Local File
+      apt_key:
+        data: "{{ lookup('file', '/home/zeinab/Downloads/Jenkins-Project-test/gpg') }}"
         state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt:
+        name: docker-ce
+        state: latest
+        update_cache: true
+
+    - name: Add Jenkins user to docker group
+      user:
+        name: jenkins
+        groups: docker
+        append: yes

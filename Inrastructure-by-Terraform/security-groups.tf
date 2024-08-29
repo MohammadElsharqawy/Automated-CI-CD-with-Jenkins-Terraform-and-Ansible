@@ -82,3 +82,31 @@ resource "aws_security_group_rule" "allow_traffic_to_all" {
   protocol          = "-1"
   cidr_blocks       = ["0.0.0.0/0"]
 }
+
+
+
+resource "aws_security_group" elb_sg{
+    name        = "elb-security-group"
+    vpc_id      = module.network.vpc_id
+}
+
+resource "aws_security_group_rule" "allow_http_inbound" {
+  type              = "ingress"
+  security_group_id = aws_security_group.elb_sg.id
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+}
+
+
+resource "aws_security_group_rule" "allow_traffic_to_all" {
+  type              = "egress"
+  security_group_id = aws_security_group.elb_sg.id
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+}
+
+

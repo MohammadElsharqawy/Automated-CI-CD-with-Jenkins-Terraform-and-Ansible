@@ -13,13 +13,13 @@ resource "aws_elasticache_subnet_group" "elasticahe_subnet_group" {
 
 # Create the ElastiCache cluster
 resource "aws_elasticache_cluster" "redis_cluster" {
-  cluster_id           = "elsharq-redis-cluster"
-  engine               = "redis"
-  node_type            = "cache.t3.micro"
-  num_cache_nodes      = 1
+  cluster_id           = var.redis_cluster.cluster_id
+  engine               = var.redis_cluster.cluster_engine_version
+  node_type            = var.redis_cluster.cluster_nodetype
+  num_cache_nodes      = var.redis_cluster.cluster_nOfnodes
   parameter_group_name = "default.redis7"
-  engine_version       = "7.1"
-  port                 = 6379
+  engine_version       = var.redis_cluster.cluster_engine
+  port                 = var.redis_cluster.cluster_port
   subnet_group_name    = aws_elasticache_subnet_group.elasticahe_subnet_group.name
 
   security_group_ids = [aws_security_group.elasticache_security_group.id]
