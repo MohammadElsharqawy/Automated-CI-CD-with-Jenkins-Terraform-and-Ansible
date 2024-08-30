@@ -61,9 +61,9 @@ pipeline {
                 script {
                     sh """
                         echo ">>> Start Clearing old Docker images >>>"
-                        docker ps -aq --filter="ancestor=${APP_NAME}:latest" | xargs -r docker stop
-                        docker ps -aq --filter="ancestor=${APP_NAME}:latest" | xargs -r docker rm
-                        docker rmi -f ${APP_NAME}:latest || true
+                        docker ps -aq --filter="ancestor=${APP_NAME}" | xargs -r docker stop
+                        docker ps -aq --filter="ancestor=${APP_NAME}" | xargs -r docker rm
+                        docker rmi -f ${APP_NAME} || true
                         echo 'Clearing old images succeeded'
                     """
                 }
