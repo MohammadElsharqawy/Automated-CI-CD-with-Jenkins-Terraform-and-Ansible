@@ -50,7 +50,7 @@ pipeline {
         success {
             build job: 'nodeapp-CD', parameters: [
                              string(name: 'BUILD_NUMBER', value: env.BUILD_NUMBER),
-                             string(name: 'TERRAFORM_WORKSPACE', value: params.WORKSPACE)
+                             string(name: 'WORKSPACE', value: params.WORKSPACE)
                           ]
         }
     }
